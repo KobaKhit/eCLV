@@ -60,8 +60,9 @@ DERL(alphabeta[1],alphabeta[2],discount = 0.1, renewals = 4)
 # Expected Lifetime Value per customer assuming expected net cash flow is 100$ per period
 DEL(alphabeta[1],alphabeta[2],discount = 0.1)*100
 
-# Expected ResidualLifetime Value per customer assuming expected net cash flow is 100$ per period
-DERL(alphabeta[1],alphabeta[2],discount = 0.1)*100
+# Expected Residual Lifetime Value per customer who renewed 4 times
+# assuming expected net cash flow is 100$ per period
+DERL(alphabeta[1],alphabeta[2],renewals = 4, discount = 0.1)*100
 ```
 
 ## References
