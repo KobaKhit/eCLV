@@ -10,8 +10,8 @@ Koba Khitalishivli
 
 # Introduction
 
-Collection of functions that compute Expected Customer Lifetime Value based on research by Fader and
-Hardie.
+Collection of functions that compute Expected Customer Lifetime Value in a subscription (contractual) 
+setting based on research by Fader and Hardie.
 
 ## Usage
 
@@ -19,6 +19,9 @@ We will use the example data from paper 1 in the references section.
 
 
 ```r
+# Load the functions
+source("lib-BG.R")
+
 # Example from paper
 # Data
 activeCust = c(869,743,653,593,551,517,491)
