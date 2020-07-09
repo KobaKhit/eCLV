@@ -5,9 +5,6 @@ November 5, 2016
 
 # eCLV
 
-by Glenn Solomon, Shachi Parikh, Jordan McIntyre, Brian Silverman, Tejaswi Namana, Maaz Rehan,
-Koba Khitalishivli
-
 # Introduction
 
 Collection of functions that compute Expected Customer Lifetime Value in a subscription (contractual) 
