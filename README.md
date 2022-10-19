@@ -1,14 +1,24 @@
-# README
-November 5, 2016  
+---
+title: "README"
+date: ""
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 
-# eCLV
+[![Language](https://img.shields.io/badge/language-R-blue)](https://img.shields.io/badge/language-R-blue)
+[![GitHub issues](https://img.shields.io/github/issues/KobaKhit/eCLV)](https://github.com/KobaKhit/eCLV/issues)
+[![GitHub forks](https://img.shields.io/github/forks/KobaKhit/eCLV)](https://github.com/KobaKhit/eCLV/network)
+[![GitHub stars](https://img.shields.io/github/stars/KobaKhit/eCLV)](https://github.com/KobaKhit/eCLV/stargazers)
+[![GitHub license](https://img.shields.io/github/license/KobaKhit/eCLV)](https://github.com/KobaKhit/eCLV)
 
-# Introduction
 
-Collection of functions that compute Expected Customer Lifetime Value in a subscription (contractual) 
-setting based on research by Fader and Hardie.
+Collection of functions that compute Expected Customer Lifetime Value in a subscription (contractual) setting based on research by Fader and Hardie. More on [Rpubs](https://rpubs.com/Koba/projecting-clv).
+
+![](README_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
 
 ## Usage
 
@@ -40,7 +50,25 @@ alphabeta
 
 ```r
 # Survival probabilities for 10 periods
-survivalBG(alphabeta[1],alphabeta[2],1:10)
+periods = 1:10
+sProb = survivalBG(alphabeta[1],alphabeta[2], periods)
+# Churn probabilities for 10 periods
+cProb = churnBG(alphabeta[1],alphabeta[2],periods)
+# Get the retention rates for 10 periods
+rProb = retentionRates(alphabeta[1],alphabeta[2],periods)
+# create plot
+dat = data.frame(sProb,cProb,rProb)
+matplot(dat, type = c("b"), ylab = 'probability', xlab='period', 
+        pch=1:3,col=c('darkgray','red','blue'), lty=1:3, 
+        main='Shifted Beta Geometric Model Probabilities, t=10')
+legend(x=1,y=0.5, legend=c("Survival Prob", "Churn Prob","Retention Prob"), 
+       col=c('darkgray','red','blue'), lty=1:3, pch=1:3) 
+```
+
+![](README_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+```r
+sProb
 ```
 
 ```
@@ -49,8 +77,7 @@ survivalBG(alphabeta[1],alphabeta[2],1:10)
 ```
 
 ```r
-# Churn probabilities for 10 periods
-churnBG(alphabeta[1],alphabeta[2],1:10)
+cProb
 ```
 
 ```
@@ -59,8 +86,7 @@ churnBG(alphabeta[1],alphabeta[2],1:10)
 ```
 
 ```r
-#  Get the retention rates for 10 periods
-retentionRates(alphabeta[1],alphabeta[2],1:10)
+rProb
 ```
 
 ```
@@ -107,6 +133,6 @@ DERL(alphabeta[1],alphabeta[2],renewals = 4, discount = 0.1)*100
 
 ## References
 
-1. [How to Project Customer Retention](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjXxq-v4ZLQAhWp64MKHYtSC9UQFggdMAA&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.558.935%26rep%3Drep1%26type%3Dpdf&usg=AFQjCNHiSlM9GzZC_VIbQ2rgtSJ6dtSdwA&sig2=twz37wWrSTSSHAo6Dwj0iA) by Peter Fader and Bruce Hardie (2007)
+1. [How to Project Customer Retention](https://faculty.wharton.upenn.edu/wp-content/uploads/2012/04/Fader_hardie_jim_07.pdf) by Peter Fader and Bruce Hardie (2007)
 
 2. [Fitting the sBG Model to Multi-Cohort Data](http://brucehardie.com/notes/017/) by Peter Fader and Bruce Hardie (2007)

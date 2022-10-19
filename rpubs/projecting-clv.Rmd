@@ -1,0 +1,170 @@
+---
+title: "Projecting Customer Retention in R"
+date: "October 18, 2022"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+In the paper [“How to project customer retention”](https://faculty.wharton.upenn.edu/wp-content/uploads/2012/04/Fader_hardie_jim_07.pdf) by Fader and Hardie there is a neat example of using shifted Beta Geometric distribution (sBG) to project customer retention in Excel. Below you can see the same model being replicated in R.
+
+## Model
+
+The likelihood function from the paper we need to maximize is below (numbered (B3) in the Appendix).
+
+$$
+LL(\alpha,\beta | \text{data}) = \sum_{t=1}^{t_f} n_t \ln [P(T=t | \alpha,\beta)] + 
+(n-\sum_{t=1}^{t_f} n_t) \ln [S(t_{f} | \alpha,\beta)] 
+$$
+  
+  - where $n_t$ is the number of lost customers in period $t$
+  - $n$ is the number of active customers in the last period $t_f$
+  - $t_f$ is the final period
+  - $P(T=t|α,β)$ is the probability that a random customer will not renew in period $t$
+  - $S(t|α,β)$ is the probability that a random customer will renew in period $t$
+
+The probability that a random customer will not renew in period $t$ is below
+$$
+P(T=t) = \begin{cases} \frac{\alpha}{\alpha + \beta}, & \mbox{if } t=1 \\ 
+\frac{\beta+t-2}{\alpha+\beta+t-1}, & \mbox{if } t>1 \end{cases}
+$$
+and the survival function, the probability a random customer will renew, is
+$$
+S(t | \alpha, \beta) = \begin{cases} 1-P(T=1 | \alpha, \beta), & \mbox{if } t=1 \\ 
+S(t-1) - P(T=t | \alpha,\beta), & \mbox{if } t>1 \end{cases}
+$$
+
+## Code
+
+```{r, warning = F, message = F}
+library(plotly)
+
+churnBG <- Vectorize(function(alpha,beta,period){
+  # Computes churn probabilities based on sBG distribution
+  # Equation (7) in Paper 1
+  #
+  # Args:
+  #  alpha: numeric
+  #  beta: numeric
+  #  period: integer or vector of integers
+  #
+  # Returns:
+  #  Vector of churn probabilities for period(s) 
+  t1 = alpha/(alpha+beta)
+  result = t1
+  if (period > 1) {
+    result = churnBG(alpha,beta,period-1)*(beta+period-2)/(alpha+beta+period-1)
+  }
+  
+  return(result)
+}, vectorize.args = c("period"))
+
+# values
+churnBG(1,1,1:10)
+
+# plot
+t <- 1:10
+churns.prob <- churnBG(1,1,1:10)
+data <- data.frame(t, churns.prob)
+
+plot_ly(data, x = ~t, y = ~churns.prob, type = 'scatter', mode = 'lines') %>%
+  layout(title = "Density plot for P(T=t | aplha, beta) for t=10",
+                     xaxis = list(title = "Period, t"),
+                     yaxis = list(title = "P(T=t | aplha, beta)"))
+```
+
+### Survival Probabilities
+```{r}
+survivalBG = Vectorize(function(alpha, beta, period){
+  # Computes survival probabilites based on a sBG distribution
+  #
+  # Args:
+  #  alpha: numeric
+  #  beta: numeric
+  #  period: integer or vector of integers
+  #
+  # Returns:
+  #  Vector of survival probabilities for period(s) 
+  t1 = 1-churnBG(alpha,beta,1)
+  result = t1
+  if(period>1){
+    result = survivalBG(alpha,beta,period-1)-churnBG(alpha,beta,period)
+  }
+  return(result)
+}, vectorize.args = c("period"))
+
+# values
+survivalBG(1,1,1:10)
+
+# plot
+t <- 1:10
+survival.probs <- survivalBG(1,1,1:10)
+data <- data.frame(t, survival.probs)
+
+plot_ly(data, x = ~t, y = ~survival.probs, type = 'scatter', mode = 'lines') %>%
+  layout(title = "Density plot for S(T=t | aplha, beta) for t=10",
+                     xaxis = list(title = "Period, t"),
+                     yaxis = list(title = "S(T=t | aplha, beta)"))
+```
+
+### Likelihood function
+```{r}
+MLL = function(alphabeta){
+  # Computesl ikelihood. Equation (B3) in Paper 1
+  #
+  # Args:
+  #  alphabeta: vector with alpha being the first and beta being the second elements, c(a,b)
+  #
+  # Returns:
+  #  Vector of churn probabilities for period(s) 
+  #
+  # Error handling
+  if(length(activeCust) != length(lostCust)){
+    stop("Variables activeCust and lostCust have different lengths: ",
+         length(activeCust), " and ", length(lostCust), ".")
+  }
+  # Example data for seven periods
+  # activeCust = c(869,743,653,593,551,517,491)
+  # lostCust = c(131,126,90,60,42,34,26)
+  t=length(activeCust) # number of periods
+  alpha = alphabeta[1]
+  beta = alphabeta[2]
+  return(-as.numeric(
+    sum(lostCust*log(churnBG(alpha,beta,1:t))) +
+      activeCust[t]*log(survivalBG(alpha,beta,t))
+  ))
+}
+
+# Data from paper
+activeCust = c(869,743,653,593,551,517,491)
+lostCust = c(131,126,90,60,42,34,26)
+
+MLL(c(1,1))
+```
+
+### Example From Paper
+Below we recreate the example from the paper using the same data.
+```{r}
+# Data
+activeCust = c(869,743,653,593,551,517,491)
+lostCust = c(131,126,90,60,42,34,26)
+
+# MLL optimization. Result are same as in the paper alpha=0.668, beta = 3.806. Good to go
+# Obj. value = -1611.2
+optim(c(1,1),MLL)
+
+# plot of churn probabilities
+plot_ly(x = 1:7, y = churnBG(alpha = 0.668, beta = 3.806, 1:7),
+        type = 'scatter', mode = 'lines') %>%
+  layout(title = "Density plot for P(T=t | aplha, beta) for t=10 fitted to the example data",
+         xaxis = list(title = "Period, t"),
+         yaxis = list(title = "P(T=t | aplha, beta)"))
+
+# plot of survival probabilities
+plot_ly(x = 0:7, y = c(1,survivalBG(alpha = 0.668, beta = 3.806, 1:7)),
+        type = 'scatter', mode = 'lines') %>%
+  layout(title = "Density plot for S(T=t | aplha, beta) for t=10 fitted to the example data",
+         xaxis = list(title = "Period, t"),
+         yaxis = list(title = "S(T=t | aplha, beta)"))
+```

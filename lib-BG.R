@@ -8,9 +8,7 @@
 # value
 
 # Paper 1. "How to project customer retention" Fader and Hardie (2007)
-# http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.558.935&rep=rep1&type=pdf
-#
-# Presentation 1.
+# https://faculty.wharton.upenn.edu/wp-content/uploads/2012/04/Fader_hardie_jim_07.pdf
 
 churnBG <- Vectorize(function(alpha,beta,period){
   # Computes churn probabilities based on sBG distribution
