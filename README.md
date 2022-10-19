@@ -1,12 +1,3 @@
----
-title: "README"
-date: ""
-output: 
-  html_document:
-    keep_md: true
----
-
-
 
 [![Language](https://img.shields.io/badge/language-R-blue)](https://img.shields.io/badge/language-R-blue)
 [![GitHub issues](https://img.shields.io/github/issues/KobaKhit/eCLV)](https://github.com/KobaKhit/eCLV/issues)
