@@ -8,6 +8,13 @@
 
 Collection of functions that compute Expected Customer Lifetime Value in a subscription (contractual) setting based on research by Fader and Hardie. More on [Rpubs](https://rpubs.com/Koba/projecting-clv).
 
+This approach only requires two inputs:
+
+  - Active Customers in period $t$
+  - Churned customers in period $t$
+  
+Given these we plug it into the shifted-beta-geometric probability model to get retention rates for any given customer in period t. Paired with spend we are able to project customer's lifetime value. 
+
 ![](README_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 
